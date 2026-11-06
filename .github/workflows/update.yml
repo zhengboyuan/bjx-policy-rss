@@ -1,10 +1,12 @@
 name: Archive policy and publish RSS
 on:
-  push:
-    branches: [main]
-  schedule:
-    - cron: '37 */6 * * *'
   workflow_dispatch:
+    inputs:
+      mode:
+        description: 'collect: 抓取并发布；publish: 仅发布已核实的数据'
+        type: choice
+        options: [collect, publish]
+        default: collect
 permissions:
   contents: write
   pages: write
@@ -24,9 +26,12 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - run: pip install -r requirements.txt
-      - run: python -m playwright install --with-deps chromium
-      - run: python -u collect.py
+      - if: inputs.mode == 'collect'
+        run: pip install -r requirements.txt
+      - if: inputs.mode == 'collect'
+        run: python -m playwright install --with-deps chromium
+      - if: inputs.mode == 'collect'
+        run: python -u collect.py
       - name: Persist archive
         run: |
           git config user.name 'github-actions[bot]'

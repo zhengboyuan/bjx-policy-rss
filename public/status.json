@@ -1,0 +1,15 @@
+{
+  "updated_at": "2026-11-06T16:33:37.651546+08:00",
+  "source_page": "https://news.bjx.com.cn/zc/1/",
+  "source_pages": 79,
+  "pages_fetched_this_run": 1,
+  "archive_complete": false,
+  "full_scan_this_run": false,
+  "archive_count": 64,
+  "oldest_date": "2026-11-05",
+  "newest_date": "2026-11-06",
+  "automatic_updates": false,
+  "mode": "manual_browser_snapshot",
+  "coverage": "仅官网当前第一页的64篇预览；其余78页尚未抓取。",
+  "blocker": "本机与GitHub Actions自动访问均遇到网站验证，定时任务暂停。"
+}

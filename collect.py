@@ -92,7 +92,8 @@ def publish(items, status):
     rss = ET.Element('rss', version='2.0')
     channel = ET.SubElement(rss, 'channel')
     for tag, value in {
-        'title': '北极星电力网｜政策（历史归档与更新）',
+        'title': ('北极星电力网｜政策（历史归档与更新）' if status.get('archive_complete')
+                  else '北极星电力网｜政策（当前页预览，自动更新未启用）'),
         'link': PAGE,
         'description': '非官方 RSS。归档北极星电力网政策栏目公开列表，保留标题、日期和原文链接。版权归原作者。',
         'language': 'zh-cn', 'ttl': '360',
@@ -124,6 +125,9 @@ def main():
     archive = ROOT / 'data/notices.json'
     previous = json.loads(archive.read_text()) if archive.exists() else []
     records = {item['url']: item for item in previous}
+    status_path = ROOT / 'public/status.json'
+    old_status = json.loads(status_path.read_text()) if status_path.exists() else {}
+    must_scan_all = args.full or not old_status.get('archive_complete', False)
     known = set(records)
     fetched = set()
     signatures = set()
@@ -141,7 +145,7 @@ def main():
             fetched.update(urls)
             records.update({row['url']: row for row in current})
             print(f'Page {number}/{maximum}: {len(current)} records, {len(fetched)} unique fetched', flush=True)
-            if previous and not args.full and consecutive_known >= 2:
+            if previous and not must_scan_all and consecutive_known >= 2:
                 break
             if number == maximum:
                 break
@@ -152,6 +156,7 @@ def main():
         'updated_at': datetime.now(CST).isoformat(), 'source_page': PAGE,
         'source_pages': maximum, 'pages_fetched_this_run': number,
         'full_scan_this_run': number == maximum, 'fetched_unique_count': len(fetched),
+        'archive_complete': number == maximum or old_status.get('archive_complete', False),
         'archive_count': len(items), 'oldest_date': items[-1]['published_at'][:10],
         'newest_date': items[0]['published_at'][:10],
         'coverage': '首次遍历栏目当前公开分页，此后累积保存；不包含官网已下架或不再列出的更早文章。',
